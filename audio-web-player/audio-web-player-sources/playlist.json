@@ -1,0 +1,29 @@
+[
+	{
+		"artistName": "Shpongle",
+		"trackName": "Divine Moments Of Truth",
+		"albumName": "Are You Shpongled?",
+		"releaseYear": "1998",
+		"coverFile": "shpongle-are-you-shpongled.jpg",
+		"trackFile": "shpongle-divine-moments-of-truth.mp3",
+		"durationTime": "10:20"
+	},
+	{
+		"artistName": "Infected Mushroom",
+		"trackName": "Heavyweight",
+		"albumName": "Vicious Delicious",
+		"releaseYear": "2007",
+		"coverFile": "infected-mushroom-vicious-delicious.jpg",
+		"trackFile": "infected-mushroom-heavyweight.mp3",
+		"durationTime": "08:41"
+	},
+	{
+		"artistName": "Younger Brother",
+		"trackName": "All I Want",
+		"albumName": "The Last Days Of Gravity",
+		"releaseYear": "2007",
+		"coverFile": "younger-brother-the-last-days-of-gravity.jpg",
+		"trackFile": "younger-brother-all-i-want.mp3",
+		"durationTime": "09:04"
+	}
+]
