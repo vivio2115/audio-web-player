@@ -4,7 +4,7 @@
     "trackTitleStopped": "Tytuł utworu",
     "artistNameStopped": "Nazwa artysty",
     "coverImageTitle": "Okładka albumu",
-    "noCoverImageTitle": "Okładka nieznanego albumu",
+    "coverImageWithoutTitle": "Okładka nieznanego albumu",
     "playlistHeaderSubtitle": "Kliknij poniżej wybrany utwór, aby rozpocząć jego odtwarzanie:",
     "showPlaylist": true,
     "showPreviousButton": true,
@@ -14,7 +14,7 @@
     "setVolumeOfSound": "full",
     "timeFormat": "$cur_min_1$:$cur_sec_2$ / $dur_min_1$:$dur_sec_2$",
     "playlistItemTitleFormat": "$artist_name$ &ndash; $track_name$ [$dur_min_1$:$dur_sec_2$]",
-    "playlistItemSubitleFormat": "z&nbsp;albumu $album_name$ z&nbsp;roku $release_year$",
+    "playlistItemSubtitleFormat": "z&nbsp;albumu $album_name$ z&nbsp;roku $release_year$",
     "selectedTrack": "none"
   },
   "playlist": [
