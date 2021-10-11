@@ -82,12 +82,12 @@ Wersja 3: W trzeciej wersji programu wprowadzono większą kontrolę nad formą 
         ]
       }
       ```
-      Obiekt *interface* reprezentujący strukturę interfejsu aplikacji obowiązkowo musi składać się z 12 następujących pól wraz z przypisanymi wartościami:
+      Obiekt *interface* reprezentujący strukturę interfejsu aplikacji obowiązkowo musi składać się z 16 następujących pól wraz z przypisanymi wartościami:
       - `"headerTitle":` - dowolny tytuł aplikacji
       - `"trackTitleStopped":` - dowolny tekst wyświetlany w miejscu tytułu utworu, gdy odtwarzanie jest zatrzymane
       - `"artistNameStopped":` - dowolny tekst wyświetlany w miejscu nazwy artysty, gdy odtwarzanie jest zatrzymane
-      - `"coverImageTitle":` - dowolny tekst dodawany przed nazwą albumu z okładką
-      - `"noCoverImageTitle":` – dowolny tekst dodawany przed nazwą albumu bez okładki
+      - `"coverImageTitle":` - dowolny tekst rozpoczynający tytuł okładki z nadaną nazwą albumu
+      - `"coverImageWithoutTitle":` – dowolny tekst rozpoczynający tytuł okładki bez nadanej nazwy albumu
       - `"playlistHeaderSubtitle":` - dowolny tekst wyświetlany przed listą odtwarzania
       - `"showPlaylist":` – ustawić true jeśli lista odtwarzania ma być wyświetlana lub false w przeciwnym wypadku
       - `"showPreviousButton":` - ustawić *true* jeśli przycisk zmiany utworu na poprzedni ma być wyświetlany lub *false* w przeciwnym wypadku
