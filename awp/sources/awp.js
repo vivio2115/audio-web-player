@@ -4,21 +4,31 @@ document.onreadystatechange = function () {
     var settingsObject;
     var isMouseDown = false;
     var playingTrackNumber;
+    var volumeControlAngle;
     var refreshPlayerProgressInterval1;
     var refreshPlayerProgressInterval2;
     var refreshPlayerProgressInterval3;
 
+    var focusableElements = document.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    var startTabindexValue = 0;
+    for (let loop = 0; loop < focusableElements.length; loop++) {
+      if (focusableElements[loop].hasAttribute('tabindex') && parseInt(focusableElements[loop].tabIndex) > startTabindexValue) {
+        startTabindexValue = focusableElements[loop].tabIndex + 1;
+      }
+    }
     var audioWebPlayerContainer = document.getElementById('audio-web-player');
     var audioWebPlayerModalWindowWrapperElement = document.createElement('div');
     audioWebPlayerModalWindowWrapperElement.id = 'audio-web-player-modal-window-wrapper';
     audioWebPlayerModalWindowWrapperElement.className = 'not-displayed';
     var audioWebPlayerModalWindowElement = document.createElement('div');
-    audioWebPlayerModalWindowElement.className = 'audio-web-player-modal-window';
+    audioWebPlayerModalWindowElement.id = 'audio-web-player-modal-window';
     audioWebPlayerModalWindowWrapperElement.appendChild(audioWebPlayerModalWindowElement);
     var audioWebPlayerModalWindowCloseIconElement = document.createElement('img');
     audioWebPlayerModalWindowCloseIconElement.id = 'audio-web-player-modal-window-close-icon';
-    audioWebPlayerModalWindowCloseIconElement.setAttribute('src', 'audio-web-player/awp-sources/close.svg');
+    audioWebPlayerModalWindowCloseIconElement.setAttribute('src', 'awp/sources/close.svg');
     audioWebPlayerModalWindowCloseIconElement.setAttribute('alt', 'Ikona do zamykania podglądu okładki albumu');
+    audioWebPlayerModalWindowCloseIconElement.setAttribute('role', 'button');
+    audioWebPlayerModalWindowCloseIconElement.setAttribute('aria-label', 'Zamknij podgląd okładki albumu');
     audioWebPlayerModalWindowCloseIconElement.setAttribute('title', 'Zamknij podgląd okładki albumu');
     audioWebPlayerModalWindowElement.appendChild(audioWebPlayerModalWindowCloseIconElement);
     var audioWebPlayerModalWindowMainImageElement = document.createElement('img');
@@ -28,12 +38,13 @@ document.onreadystatechange = function () {
     var audioElement = document.createElement('audio');
     var headerTitleElement = document.createElement('h1');
     var audioWebPlayerSubElement = document.createElement('div');
-    var audioWebPlayerCoverImageElement = document.createElement('div');
-    audioWebPlayerCoverImageElement.id = 'audio-web-player-cover-image';
-    audioWebPlayerSubElement.appendChild(audioWebPlayerCoverImageElement);
-    var audioWebPlayerCoverImageElementSubElement = document.createElement('img');
-    audioWebPlayerCoverImageElement.appendChild(audioWebPlayerCoverImageElementSubElement);
+    var audioWebPlayerCoverImageContainer = document.createElement('div');
+    audioWebPlayerCoverImageContainer.id = 'audio-web-player-cover-image';
+    var audioWebPlayerCoverImageThumbnailElement = document.createElement('img');
+    audioWebPlayerCoverImageContainer.appendChild(audioWebPlayerCoverImageThumbnailElement);
+    audioWebPlayerSubElement.appendChild(audioWebPlayerCoverImageContainer);
     var audioWebPlayerControlsElement = document.createElement('div');
+    audioWebPlayerControlsElement.id = 'audio-web-player-current-track';
     audioWebPlayerSubElement.appendChild(audioWebPlayerControlsElement);
     var audioWebPlayerControlsSubElement = document.createElement('div');
     audioWebPlayerControlsElement.appendChild(audioWebPlayerControlsSubElement);
@@ -46,36 +57,59 @@ document.onreadystatechange = function () {
     audioWebPlayerArtistNameElement.innerHTML = 'Nazwa artysty';
     audioWebPlayerControlsSubElement.appendChild(audioWebPlayerArtistNameElement);
     var audioWebPlayerControlsSubTwoElement = document.createElement('div');
+    var audioWebPlayerControlsContainerElement = document.createElement('div');
+    audioWebPlayerControlsSubTwoElement.appendChild(audioWebPlayerControlsContainerElement);
     var audioWebPlayerPrevIconElement = document.createElement('div');
     audioWebPlayerPrevIconElement.id = 'audio-web-player-prev-icon';
     audioWebPlayerPrevIconElement.setAttribute('class', '');
+    audioWebPlayerPrevIconElement.setAttribute('role', 'button');
+    audioWebPlayerPrevIconElement.setAttribute('aria-label', 'Przejdź do poprzedniego utworu');
     audioWebPlayerPrevIconElement.setAttribute('title', 'Przejdź do poprzedniego utworu');
-    audioWebPlayerControlsSubTwoElement.prepend(audioWebPlayerPrevIconElement);
+    audioWebPlayerControlsContainerElement.prepend(audioWebPlayerPrevIconElement);
     var audioWebPlayerPlayPauseIconElement = document.createElement('div');
     audioWebPlayerPlayPauseIconElement.id = 'audio-web-player-play-pause-icon';
     audioWebPlayerPlayPauseIconElement.setAttribute('class', '');
-    audioWebPlayerPlayPauseIconElement.style.display = 'block';;
+    audioWebPlayerPlayPauseIconElement.setAttribute('role', 'button');
+    audioWebPlayerPlayPauseIconElement.setAttribute('aria-label', 'Rozpocznij odtwarzanie utworu');
     audioWebPlayerPlayPauseIconElement.setAttribute('title', 'Rozpocznij odtwarzanie utworu');
-    audioWebPlayerControlsSubTwoElement.appendChild(audioWebPlayerPlayPauseIconElement);
+    audioWebPlayerPlayPauseIconElement.style.display = 'block';
+    audioWebPlayerControlsContainerElement.appendChild(audioWebPlayerPlayPauseIconElement);
     var audioWebPlayerStopIconElement = document.createElement('div');
     audioWebPlayerStopIconElement.id = 'audio-web-player-stop-icon';
     audioWebPlayerStopIconElement.className = 'disabled';
+    audioWebPlayerStopIconElement.setAttribute('role', 'button');
+    audioWebPlayerStopIconElement.setAttribute('aria-label', 'Zatrzymaj odtwarzanie utworu');
     audioWebPlayerStopIconElement.setAttribute('title', 'Zatrzymaj odtwarzanie utworu');
-    audioWebPlayerControlsSubTwoElement.appendChild(audioWebPlayerStopIconElement);
+    audioWebPlayerControlsContainerElement.appendChild(audioWebPlayerStopIconElement);
     audioWebPlayerControlsElement.appendChild(audioWebPlayerControlsSubTwoElement);
     var audioWebPlayerNextIconElement = document.createElement('div');
     audioWebPlayerNextIconElement.id = 'audio-web-player-next-icon';
     audioWebPlayerNextIconElement.setAttribute('class', '');
+    audioWebPlayerNextIconElement.setAttribute('role', 'button');
+    audioWebPlayerNextIconElement.setAttribute('aria-label', 'Przejdź do następnego utworu');
     audioWebPlayerNextIconElement.setAttribute('title', 'Przejdź do następnego utworu');
-    audioWebPlayerControlsSubTwoElement.appendChild(audioWebPlayerNextIconElement);
+    audioWebPlayerControlsContainerElement.appendChild(audioWebPlayerNextIconElement);
     audioWebPlayerVolumeKnobIconElement = document.createElement('div');
     audioWebPlayerVolumeKnobIconElement.id = 'audio-web-player-volume-knob-icon';
+    audioWebPlayerVolumeKnobIconElement.tabIndex = startTabindexValue + 4;
+    audioWebPlayerVolumeKnobIconElement.setAttribute('role', 'slider');
+    audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuemin', '0');
+    audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuemax', '100');
+    audioWebPlayerVolumeKnobIconElement.setAttribute('aria-label', 'Zmień poziom głośności');
     audioWebPlayerVolumeKnobIconElement.setAttribute('title', 'Zmień poziom głośności');
+    audioWebPlayerControlsContainerElement.appendChild(audioWebPlayerVolumeKnobIconElement);
     var audioWebPlayerProgressTimeElement = document.createElement('div');
     audioWebPlayerProgressTimeElement.id = 'audio-web-player-progress-time';
     audioWebPlayerControlsSubTwoElement.appendChild(audioWebPlayerProgressTimeElement);
     var audioWebPlayerProgressBarElement = document.createElement('div');
     audioWebPlayerProgressBarElement.id = 'audio-web-player-progress-bar';
+    audioWebPlayerProgressBarElement.tabIndex = -1;
+    audioWebPlayerProgressBarElement.setAttribute('role', 'progressbar');
+    audioWebPlayerProgressBarElement.setAttribute('aria-valuenow', '0');
+    audioWebPlayerProgressBarElement.setAttribute('aria-valuemin', '0');
+    audioWebPlayerProgressBarElement.setAttribute('aria-valuemax', '100');
+    audioWebPlayerProgressBarElement.setAttribute('aria-label', 'Postęp odtwarzanego utworu');
+    audioWebPlayerProgressBarElement.setAttribute('title', 'Postęp odtwarzanego utworu');
     audioWebPlayerControlsElement.appendChild(audioWebPlayerProgressBarElement);
     var audioWebPlayerProgressBarSubElement = document.createElement('div');
     audioWebPlayerProgressBarElement.appendChild(audioWebPlayerProgressBarSubElement);
@@ -84,16 +118,20 @@ document.onreadystatechange = function () {
 
     if (window.location.protocol == 'http:' || window.location.protocol == 'https:') {
       var request = new XMLHttpRequest();
-      request.open('GET', 'audio-web-player/awp-sources/settings.json', true);
+      request.open('GET', 'awp/sources/settings.json', true);
       request.send(null);
       request.onreadystatechange = function() {
         if (request.readyState === 4 && request.status === 200) {
           try {
             settingsObject = JSON.parse(request.responseText);
             if (settingsObject.interface.setVolumeOfSound == "full") {
+              volumeControlAngle = 135;
               audioElement.volume =  1;
+              audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', '100');
             } else {
+              volumeControlAngle = parseFloat(settingsObject.interface.setVolumeOfSound) / 100 * 270 - 135;
               audioElement.volume =  parseFloat(settingsObject.interface.setVolumeOfSound) / 100;
+              audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.round(settingsObject.interface.setVolumeOfSound));
             }
             headerTitleElement.innerHTML = settingsObject.interface.headerTitle;
             audioWebPlayerModalWindowMainImageElement.id = 'audio-web-player-modal-window-main-image';
@@ -106,68 +144,20 @@ document.onreadystatechange = function () {
             if (settingsObject.interface.showStopButton == true) {
               audioWebPlayerStopIconElement.style.display = 'block';
               audioWebPlayerStopIconElement.addEventListener('click', function() {
-                if (refreshPlayerProgressInterval1) {
-                  clearInterval(refreshPlayerProgressInterval1);
+                if (this.hasAttribute('class') && this.classList.contains('enabled')) {
+                  stopTrack();
                 }
-                if (refreshPlayerProgressInterval2) {
-                  clearInterval(refreshPlayerProgressInterval2);
-                }
-                if (refreshPlayerProgressInterval3) {
-                  clearInterval(refreshPlayerProgressInterval3);
-                }
-                if (audioWebPlayerContainer.hasAttribute('class') && (audioWebPlayerContainer.classList.contains('audio-web-player-playing') || audioWebPlayerContainer.classList.contains('audio-web-player-paused'))) {
-                  if (audioWebPlayerContainer.classList.contains('audio-web-player-playing')) {
-                    audioWebPlayerContainer.classList.remove('audio-web-player-playing');
-                  }
-                  if (audioWebPlayerContainer.classList.contains('audio-web-player-paused')) {
-                    audioWebPlayerContainer.classList.remove('audio-web-player-paused');
-                  }
-                  audioWebPlayerContainer.classList.add('audio-web-player-stopped');
-                  audioElement.pause();
-                  audioElement.currentTime = 0;
-                  audioWebPlayerTrackTitleElement.innerText = settingsObject.interface.trackTitleStopped;
-                  audioWebPlayerArtistNameElement.innerText = settingsObject.interface.artistNameStopped;
-                  audioWebPlayerModalWindowMainImageElement.id = 'audio-web-player-modal-window-main-image';
-                  audioWebPlayerModalWindowMainImageElement.setAttribute('src', 'audio-web-player/awp-sources/album-cover.png');
-                  audioWebPlayerModalWindowMainImageElement.setAttribute('alt', settingsObject.interface.coverImageTitle);
-                  audioWebPlayerModalWindowMainImageElement.setAttribute('title', settingsObject.interface.coverImageTitle);
-                  audioWebPlayerCoverImageElementSubElement.setAttribute('src', 'audio-web-player/awp-sources/album-cover.png');
-                  audioWebPlayerCoverImageElementSubElement.setAttribute('alt', settingsObject.interface.coverImageTitle);
-                  audioWebPlayerCoverImageElementSubElement.setAttribute('title', settingsObject.interface.coverImageTitle);
-                  if (audioWebPlayerPrevIconElement.hasAttribute('class') && audioWebPlayerPrevIconElement.classList.contains('enabled')) {
-                    audioWebPlayerPrevIconElement.classList.remove('enabled');
-                    audioWebPlayerPrevIconElement.classList.add('disabled');
-                  }
-                  if (audioWebPlayerPlayPauseIconElement.hasAttribute('class') && audioWebPlayerPlayPauseIconElement.classList.contains('enabled')) {
-                    audioWebPlayerPlayPauseIconElement.classList.remove('enabled');
-                    audioWebPlayerPlayPauseIconElement.classList.add('disabled');
-                  }
-                  if (audioWebPlayerNextIconElement.hasAttribute('class') && audioWebPlayerNextIconElement.classList.contains('enabled')) {
-                    audioWebPlayerNextIconElement.classList.remove('enabled');
-                    audioWebPlayerNextIconElement.classList.add('disabled');
-                  }
-                  if (audioWebPlayerStopIconElement.hasAttribute('class') && audioWebPlayerStopIconElement.classList.contains('enabled')) {
-                    audioWebPlayerStopIconElement.classList.remove('enabled');
-                    audioWebPlayerStopIconElement.classList.add('disabled');
-                  }
-                  audioWebPlayerPlayPauseIconElement.setAttribute('title', 'Rozpocznij odtwarzanie utworu');
-                  var audioWebPlayerPlaylistElementRows = audioWebPlayerPlaylistElement.rows;
-                  for (var loop = 0; loop < audioWebPlayerPlaylistElementRows.length; loop++) {
-                    if (audioWebPlayerPlaylistElementRows[loop].hasAttribute('class') && audioWebPlayerPlaylistElementRows[loop].classList.contains('row-playing')) {
-                      audioWebPlayerPlaylistElementRows[loop].classList.remove('row-playing');
-                      audioWebPlayerPlaylistElementRows[loop].classList.add('row-paused');
-                    }
+              }, false);
+              audioWebPlayerStopIconElement.addEventListener('keydown', function(e) {
+                if (this.hasAttribute('class') && this.classList.contains('enabled')) {
+                  if (e.keyCode === 13 || e.keyCode === 32) {
+                    stopTrack();
                   }
                 }
-                refreshPlayerProgressFromSettingsFile();
               }, false);
             }
             if (settingsObject.interface.showVolumeKnob == true) {
               audioWebPlayerVolumeKnobIconElement.style.display = 'block';
-              document.body.addEventListener('mouseup', function() {
-                isMouseDown = false;
-                audioWebPlayerTooltipElement.style.display = 'none';
-              }, true);
               audioWebPlayerVolumeKnobIconElement.addEventListener('mousedown', e => {
                 e.preventDefault();
                 isMouseDown = true;
@@ -178,17 +168,51 @@ document.onreadystatechange = function () {
                 isMouseDown = false;
                 audioWebPlayerTooltipElement.style.display = 'none';
               });
-              audioWebPlayerVolumeKnobIconElement.addEventListener('mousemove', e => {
+              document.body.addEventListener('mouseup', function() {
+                isMouseDown = false;
+                audioWebPlayerTooltipElement.style.display = 'none';
+              }, true);
+              audioWebPlayerVolumeKnobIconElement.addEventListener('keydown', e => {
+                var volume;
+                if (e.keyCode === 33 || e.keyCode === 38 || e.keyCode === 39) {
+                  if (volumeControlAngle <= 135 - 33.75) {
+                    volumeControlAngle = volumeControlAngle + 33.75;
+                    volume = (volumeControlAngle + 135) / 270;;
+                  } else if (volumeControlAngle > 135 - 33.75) {
+                    volumeControlAngle = 135;
+                    volume = 1;
+                    var valueNow = 100;
+                  }
+                  audioElement.volume = volume;
+                  audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.round(volume * 100));
+                  audioWebPlayerVolumeKnobIconElement.firstChild.style.transform = 'rotate(' + (volumeControlAngle).toString() + 'deg)';
+                } else if (e.keyCode === 34 || e.keyCode === 37 || e.keyCode === 40) {
+                  if (volumeControlAngle >= -135 + 33.75) {
+                    volumeControlAngle = volumeControlAngle - 33.75;
+                    volume = (volumeControlAngle + 135) / 270;
+                  } else if (volumeControlAngle < -135 + 33.75) {
+                    volumeControlAngle = -135;
+                    volume = 0;
+                    var valueNow = 0;
+                  }
+                  audioElement.volume = volume;
+                  audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.round(volume * 100));
+                  audioWebPlayerVolumeKnobIconElement.firstChild.style.transform = 'rotate(' + (volumeControlAngle).toString() + 'deg)';
+                }
+              });
+              document.addEventListener('mousemove', e => {
                 if (isMouseDown === true) {
-                  let mousePointerAngle = (Math.atan2((window.scrollY + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().top + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().height / 2) - e.clientY, (window.scrollX + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().left + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().width / 2) -  e.clientX)  * 180 / Math.PI);
-                  if (mousePointerAngle > -45 || mousePointerAngle < -135) {
-                    audioWebPlayerVolumeKnobIconElement.firstChild.style.transform = 'rotate(' + (mousePointerAngle - 45).toString() + 'deg)';
-                    if (mousePointerAngle  > -45) {
-                      audioElement.volume = (mousePointerAngle + 45) / 270;
-                      audioWebPlayerTooltipElement.innerHTML = 'Głośność:&nbsp;' + Math.floor((mousePointerAngle + 45) / 270 * 100).toString() + '% ';
-                    } else if (mousePointerAngle < -135) {
-                      audioElement.volume = (mousePointerAngle + 405) / 270;
-                      audioWebPlayerTooltipElement.innerHTML = 'Głośność:&nbsp;' + Math.ceil((mousePointerAngle + 405) / 270 * 100).toString() + '%';
+                  volumeControlAngle = (Math.atan2((window.scrollY + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().top + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().height / 2) - e.clientY, (window.scrollX + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().left + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().width / 2) -  e.clientX)  * 180 / Math.PI);
+                  if (volumeControlAngle >= -45 || volumeControlAngle <= -135) {
+                    audioWebPlayerVolumeKnobIconElement.firstChild.style.transform = 'rotate(' + (volumeControlAngle - 90).toString() + 'deg)';
+                    if (volumeControlAngle >= -45) {
+                      audioElement.volume = (volumeControlAngle + 45) / 270;
+                      audioWebPlayerTooltipElement.innerHTML = 'Głośność:&nbsp;' + Math.floor((volumeControlAngle + 45) / 270 * 100).toString() + '% ';
+                      audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.floor((volumeControlAngle + 45) / 270 * 100));
+                    } else if (volumeControlAngle <= -135) {
+                      audioElement.volume = (volumeControlAngle + 405) / 270;
+                      audioWebPlayerTooltipElement.innerHTML = 'Głośność:&nbsp;' + Math.ceil((volumeControlAngle + 405) / 270 * 100).toString() + '%';
+                      audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.ceil((volumeControlAngle + 405) / 270 * 100));
                     }
                     audioWebPlayerTooltipElement.style.left = (e.clientX - audioWebPlayerContainer.getBoundingClientRect().left + 10).toString() + 'px';
                     audioWebPlayerTooltipElement.style.top = (e.clientY - audioWebPlayerContainer.getBoundingClientRect().top + 15).toString() + 'px';
@@ -196,15 +220,14 @@ document.onreadystatechange = function () {
                 }
               });
               audioWebPlayerArrowElement = document.createElement('img');
-              audioWebPlayerArrowElement.setAttribute('src', 'audio-web-player/awp-sources/arrow.svg');
+              audioWebPlayerArrowElement.setAttribute('src', 'awp/sources/arrow.svg');
               audioWebPlayerArrowElement.setAttribute('alt', 'Strzałka');
               if (settingsObject.interface.setVolumeOfSound == "full") {
-                audioWebPlayerArrowElement.style.transform = 'rotate(' + (180).toString() + 'deg)';
+                audioWebPlayerArrowElement.style.transform = 'rotate(' + (135).toString() + 'deg)';
               } else {
-                audioWebPlayerArrowElement.style.transform = 'rotate(' + (parseFloat(settingsObject.interface.setVolumeOfSound) / 100 * 270 - 90).toString() + 'deg)';
+                audioWebPlayerArrowElement.style.transform = 'rotate(' + (parseFloat(settingsObject.interface.setVolumeOfSound) / 100 * 270 - 135).toString() + 'deg)';
               }
               audioWebPlayerVolumeKnobIconElement.appendChild(audioWebPlayerArrowElement);
-              audioWebPlayerControlsSubTwoElement.appendChild(audioWebPlayerVolumeKnobIconElement);
             }
             audioWebPlayerContainer.appendChild(audioElement);
             audioWebPlayerContainer.appendChild(audioWebPlayerTooltipElement);
@@ -235,6 +258,9 @@ document.onreadystatechange = function () {
                 tableTdOneElement.innerHTML = (loop + 1) + '.';
                 tableTdTwoElement.innerHTML = outputPlaylistItemText;
                 tableTrElement.className = 'row-paused';
+                tableTrElement.setAttribute('role', 'button');
+                tableTrElement.setAttribute('aria-label', 'Rozpocznij odtwarzanie utworu numer ' + (loop + 1).toString());
+                tableTrElement.tabIndex = startTabindexValue + 6;
                 audioWebPlayerPlaylistBodyElement.appendChild(tableTrElement).appendChild(tableTdOneElement);
                 audioWebPlayerPlaylistBodyElement.appendChild(tableTrElement).appendChild(tableTdTwoElement);
               }
@@ -251,19 +277,32 @@ document.onreadystatechange = function () {
                     playPauseTrack(playingTrackNumber, true);
                   }
                 }, false);
+                audioWebPlayerPlaylistElement.addEventListener('keydown', function(e) {
+                  e.stopImmediatePropagation();
+                  if (e.target.hasAttribute('class') && e.target.classList.contains('row-paused')) {
+                    if (e.keyCode === 13 || e.keyCode === 32) {
+                      playingTrackNumber = e.target.rowIndex;
+                      playPauseTrack(playingTrackNumber, true);
+                    }
+                  }
+                }, false);
               }
             }
             if (settingsObject.interface.selectedTrack == 'none') {
               audioWebPlayerContainer.className = 'audio-web-player-stopped';
+              audioWebPlayerPrevIconElement.tabIndex = -1;
+              audioWebPlayerPlayPauseIconElement.tabIndex = -1;
+              audioWebPlayerStopIconElement.tabIndex = -1;
+              audioWebPlayerNextIconElement.tabIndex = -1;
               audioWebPlayerTrackTitleElement.innerText = settingsObject.interface.trackTitleStopped;
               audioWebPlayerArtistNameElement.innerText = settingsObject.interface.artistNameStopped;
-              audioWebPlayerModalWindowMainImageElement.setAttribute('src', 'audio-web-player/awp-sources/album-cover.png');
+              audioWebPlayerModalWindowMainImageElement.src = 'awp/sources/album-cover.png';
               audioWebPlayerModalWindowMainImageElement.setAttribute('alt', settingsObject.interface.coverImageTitle);
               audioWebPlayerModalWindowMainImageElement.setAttribute('title', settingsObject.interface.coverImageTitle);
-              audioWebPlayerCoverImageElementSubElement.setAttribute('src', 'audio-web-player/awp-sources/album-cover.png');
-              audioWebPlayerCoverImageElementSubElement.setAttribute('alt', settingsObject.interface.coverImageTitle);
-              audioWebPlayerCoverImageElementSubElement.setAttribute('title', settingsObject.interface.coverImageTitle);
-              audioWebPlayerCoverImageElement.setAttribute('title', settingsObject.interface.coverImageTitle);
+              audioWebPlayerCoverImageThumbnailElement.src = 'awp/sources/album-cover-thumbnail.png';
+              audioWebPlayerCoverImageThumbnailElement.setAttribute('alt', settingsObject.interface.coverImageTitle);
+              audioWebPlayerCoverImageThumbnailElement.setAttribute('title', settingsObject.interface.coverImageTitle);
+              audioWebPlayerCoverImageContainer.setAttribute('title', settingsObject.interface.coverImageTitle);
               if (audioWebPlayerPlayPauseIconElement.hasAttribute('class')) {
                 audioWebPlayerPlayPauseIconElement.classList.add('disabled');
               }
@@ -276,36 +315,42 @@ document.onreadystatechange = function () {
               refreshPlayerProgressFromSettingsFile();
             } else {
               audioWebPlayerContainer.className = 'audio-web-player-paused';
+              audioWebPlayerPlayPauseIconElement.tabIndex = startTabindexValue + 1;
+              audioWebPlayerStopIconElement.tabIndex = startTabindexValue + 2;
               playingTrackNumber = settingsObject.interface.selectedTrack - 1;
               let artistName = settingsObject.playlist[playingTrackNumber].hasOwnProperty('artistName') ? settingsObject.playlist[playingTrackNumber].artistName : 'Nieznany artysta';
               let trackName = settingsObject.playlist[playingTrackNumber].hasOwnProperty('trackName') ? settingsObject.playlist[playingTrackNumber].trackName : 'Nieznany utwór';
               audioWebPlayerArtistNameElement.innerText = artistName;
               audioWebPlayerTrackTitleElement.innerText = trackName;
               if (settingsObject.playlist[playingTrackNumber].hasOwnProperty('coverFile')) {
-                var albumTitleAlt = (settingsObject.playlist[playingTrackNumber].hasOwnProperty('albumName') ? settingsObject.interface.coverImageTitle + ' ' + settingsObject.playlist[playingTrackNumber].albumName : settingsObject.interface.coverImageWithoutTitle) + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('artistName') ? (' artysty ' + settingsObject.playlist[playingTrackNumber].artistName) : ' nieznanego artysty') + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('releaseYear') ? (' z roku ' + settingsObject.playlist[playingTrackNumber].releaseYear) : ' z nieznanego roku');
-                audioWebPlayerCoverImageElement.firstElementChild.src = 'audio-web-player/awp-thumbnails/' + settingsObject.playlist[playingTrackNumber].coverFile;
-                audioWebPlayerModalWindowMainImageElement.src = 'audio-web-player/awp-covers/' + settingsObject.playlist[playingTrackNumber].coverFile;
+                var albumTitleAlt = settingsObject.interface.coverImageTitle  + ' ' + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('artistName') ? (settingsObject.playlist[playingTrackNumber].artistName) : 'Nieznany artysta') + ' – ' + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('albumName') ? (settingsObject.playlist[playingTrackNumber].albumName) : 'Nieznany album') + ' ' + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('releaseYear') ? ('z roku ' + settingsObject.playlist[playingTrackNumber].releaseYear) : 'z nieznanego roku');
+                audioWebPlayerCoverImageThumbnailElement.src = 'awp/thumbnails/' + settingsObject.playlist[playingTrackNumber].coverFile;
+                audioWebPlayerModalWindowMainImageElement.src = 'awp/covers/' + settingsObject.playlist[playingTrackNumber].coverFile;
               } else {
-                audioWebPlayerCoverImageElement.firstElementChild.src = 'audio-web-player/awp-sources/album-cover-thumbnail.png';
-                audioWebPlayerModalWindowMainImageElement.src = 'audio-web-player/awp-sources/album-cover.png';
+                audioWebPlayerCoverImageThumbnailElement = 'awp/sources/album-cover-thumbnail.png';
+                audioWebPlayerModalWindowMainImageElement.src = 'awp/sources/album-cover.png';
                 var albumTitleAlt = 'Brak okładki';
               }
-              audioWebPlayerCoverImageElement.firstElementChild.setAttribute('title', albumTitleAlt);
+              audioWebPlayerCoverImageThumbnailElement.setAttribute('title', albumTitleAlt);
               audioWebPlayerModalWindowMainImageElement.setAttribute('title', albumTitleAlt);
               audioWebPlayerModalWindowMainImageElement.setAttribute('alt', albumTitleAlt);
-              audioElement.src = 'audio-web-player/awp-tracks/' + settingsObject.playlist[playingTrackNumber].trackFile;
+              audioElement.src = 'awp/tracks/' + settingsObject.playlist[playingTrackNumber].trackFile;
               if (audioWebPlayerPlayPauseIconElement.hasAttribute('class')) {
                 audioWebPlayerPlayPauseIconElement.classList.add('enabled');
               }
               if ((settingsObject.interface.selectedTrack - 1) > 0 && audioWebPlayerPrevIconElement.hasAttribute('class')) {
                 audioWebPlayerPrevIconElement.classList.add('enabled');
+                audioWebPlayerPrevIconElement.tabIndex = startTabindexValue;
               } else if ((settingsObject.interface.selectedTrack - 1) <= 0 && audioWebPlayerPrevIconElement.hasAttribute('class')) {
                 audioWebPlayerPrevIconElement.classList.add('disabled');
+                audioWebPlayerPrevIconElement.tabIndex = -1;
               }
               if ((settingsObject.interface.selectedTrack - 1) < settingsObject.playlist.length - 1 && audioWebPlayerNextIconElement.hasAttribute('class')) {
                 audioWebPlayerNextIconElement.classList.add('enabled');
+                audioWebPlayerNextIconElement.tabIndex = startTabindexValue + 3;
               } else if ((settingsObject.interface.selectedTrack - 1) >= settingsObject.playlist.length - 1 && audioWebPlayerNextIconElement.hasAttribute('class')) {
                 audioWebPlayerNextIconElement.classList.add('disabled');
+                audioWebPlayerNextIconElement.tabIndex = -1;
               }
               refreshPlayerProgressFromSettingsFile(true);
             }
@@ -331,6 +376,13 @@ document.onreadystatechange = function () {
           playPauseTrack(playingTrackNumber, false);
         }
       }, false);
+      audioWebPlayerPlayPauseIconElement.addEventListener('keydown', function(e) {
+        if (this.hasAttribute('class') && this.classList.contains('enabled')) {
+          if (e.keyCode === 13 || e.keyCode === 32) {
+            playPauseTrack(playingTrackNumber, false);
+          }
+        }
+      }, false);
     }
 
     if (!!audioWebPlayerPrevIconElement) {
@@ -338,6 +390,14 @@ document.onreadystatechange = function () {
         if (this.hasAttribute('class') && this.classList.contains('enabled')) {
           playingTrackNumber--;
           playPauseTrack(playingTrackNumber, true);
+        }
+      }, false);
+      audioWebPlayerPrevIconElement.addEventListener('keydown', function(e) {
+        if (this.hasAttribute('class') && this.classList.contains('enabled')) {
+          if (e.keyCode === 13 || e.keyCode === 32) {
+            playingTrackNumber--;
+            playPauseTrack(playingTrackNumber, true);
+          }
         }
       }, false);
     }
@@ -348,6 +408,14 @@ document.onreadystatechange = function () {
           playingTrackNumber++;
           playPauseTrack(playingTrackNumber, true);
           }
+      }, false);
+      audioWebPlayerNextIconElement.addEventListener('keydown', function(e) {
+        if (this.hasAttribute('class') && this.classList.contains('enabled')) {
+          if (e.keyCode === 13 || e.keyCode === 32) {
+            playingTrackNumber++;
+            playPauseTrack(playingTrackNumber, true);
+          }
+        }
       }, false);
     }
 
@@ -360,10 +428,93 @@ document.onreadystatechange = function () {
           refreshPlayerProgressFromSourceFile();
         }
       }, false);
+      audioWebPlayerProgressBarElement.addEventListener('keydown', e => {
+        if (audioWebPlayerContainer.hasAttribute('class') && audioWebPlayerContainer.classList.contains('audio-web-player-playing')) {
+          let currentTime = audioElement.currentTime;
+          let duration = audioElement.duration;
+          let durationPart = duration * 0.1;
+          if (e.keyCode === 33 || e.keyCode === 38 || e.keyCode === 39) {
+            if (settingsObject.interface.playlistContinuous == true) {
+              if (currentTime >= duration - durationPart) {
+                if (audioWebPlayerNextIconElement.hasAttribute('class') && audioWebPlayerNextIconElement.classList.contains('enabled')) {
+                  playingTrackNumber++;
+                  playPauseTrack(playingTrackNumber, true);
+                } else if (audioWebPlayerStopIconElement.hasAttribute('class') && audioWebPlayerStopIconElement.classList.contains('enabled')) {
+                  stopTrack();
+                }
+              } else {
+                audioElement.currentTime = currentTime + durationPart;
+                refreshPlayerProgressFromSourceFile();
+              }
+            } else {
+              if (currentTime >= duration - durationPart) {
+                if (refreshPlayerProgressInterval1) {
+                  clearInterval(refreshPlayerProgressInterval1);
+                }
+                if (refreshPlayerProgressInterval2) {
+                  clearInterval(refreshPlayerProgressInterval2);
+                }
+                if (refreshPlayerProgressInterval3) {
+                  clearInterval(refreshPlayerProgressInterval3);
+                }
+                audioElement.currentTime = 0;
+                audioElement.pause();
+                if (audioWebPlayerContainer.hasAttribute('class') && audioWebPlayerContainer.classList.contains('audio-web-player-playing')) {
+                  audioWebPlayerContainer.classList.remove('audio-web-player-playing');
+                  audioWebPlayerContainer.classList.add('audio-web-player-paused');
+                }
+                audioWebPlayerPlayPauseIconElement.setAttribute('aria-label', 'Rozpocznij odtwarzanie utworu');
+                audioWebPlayerPlayPauseIconElement.setAttribute('title', 'Rozpocznij odtwarzanie utworu');
+                audioWebPlayerProgressBarElement.tabIndex = -1;
+                refreshPlayerProgressFromSourceFile();
+              } else {
+                audioElement.currentTime = currentTime + durationPart;
+                refreshPlayerProgressFromSourceFile();
+              }
+            }
+          } else if (e.keyCode === 34 || e.keyCode === 37 || e.keyCode === 40) {
+            if (currentTime <= durationPart) {
+              audioElement.currentTime = 0;
+            } else {
+              audioElement.currentTime = currentTime - durationPart;
+            }
+            refreshPlayerProgressFromSourceFile();
+          }
+        }
+      }, false);
+
+      audioWebPlayerVolumeKnobIconElement.addEventListener('keydown', e => {
+        let volume;
+        if (e.keyCode === 33 || e.keyCode === 38 || e.keyCode === 39) {
+          if (volumeControlAngle <= 135 - 33.75) {
+            volumeControlAngle = volumeControlAngle + 33.75;
+            volume = (volumeControlAngle + 135) / 270;;
+          } else if (volumeControlAngle > 135 - 33.75) {
+            volumeControlAngle = 135;
+            volume = 1;
+            var valueNow = 100;
+          }
+          audioElement.volume = volume;
+          audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.round(volume * 100));
+          audioWebPlayerVolumeKnobIconElement.firstChild.style.transform = 'rotate(' + (volumeControlAngle).toString() + 'deg)';
+        } else if (e.keyCode === 34 || e.keyCode === 37 || e.keyCode === 40) {
+          if (volumeControlAngle >= -135 + 33.75) {
+            volumeControlAngle = volumeControlAngle - 33.75;
+            volume = (volumeControlAngle + 135) / 270;
+          } else if (volumeControlAngle < -135 + 33.75) {
+            volumeControlAngle = -135;
+            volume = 0;
+            var valueNow = 0;
+          }
+          audioElement.volume = volume;
+          audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.round(volume * 100));
+          audioWebPlayerVolumeKnobIconElement.firstChild.style.transform = 'rotate(' + (volumeControlAngle).toString() + 'deg)';
+        }
+      });
     }
 
-    if (!!audioWebPlayerCoverImageElement) {
-      audioWebPlayerCoverImageElement.addEventListener('click', function() {
+    if (!!audioWebPlayerCoverImageContainer) {
+      audioWebPlayerCoverImageContainer.addEventListener('click', function() {
         if (audioWebPlayerModalWindowWrapperElement.hasAttribute('class') && audioWebPlayerModalWindowWrapperElement.classList.contains('not-displayed')) {
           audioWebPlayerModalWindowWrapperElement.classList.remove('not-displayed');
           audioWebPlayerModalWindowWrapperElement.classList.add('displayed');
@@ -382,22 +533,33 @@ document.onreadystatechange = function () {
 
     if (!!audioElement) {
       audioElement.addEventListener('ended', function() {
-        if (refreshPlayerProgressInterval1) {
-          clearInterval(refreshPlayerProgressInterval1);
+        if (settingsObject.interface.playlistContinuous == true) {
+          if (audioWebPlayerNextIconElement.hasAttribute('class') && audioWebPlayerNextIconElement.classList.contains('enabled')) {
+            playingTrackNumber++;
+            playPauseTrack(playingTrackNumber, true);
+          } else if (audioWebPlayerStopIconElement.hasAttribute('class') && audioWebPlayerStopIconElement.classList.contains('enabled')) {
+            stopTrack();
+          }
+        } else {
+          if (refreshPlayerProgressInterval1) {
+            clearInterval(refreshPlayerProgressInterval1);
+          }
+          if (refreshPlayerProgressInterval2) {
+            clearInterval(refreshPlayerProgressInterval2);
+          }
+          if (refreshPlayerProgressInterval3) {
+            clearInterval(refreshPlayerProgressInterval3);
+          }
+          this.currentTime = 0;
+          if (audioWebPlayerContainer.hasAttribute('class') && audioWebPlayerContainer.classList.contains('audio-web-player-playing')) {
+            audioWebPlayerContainer.classList.remove('audio-web-player-playing');
+            audioWebPlayerContainer.classList.add('audio-web-player-paused');
+          }
+          audioWebPlayerPlayPauseIconElement.setAttribute('aria-label', 'Rozpocznij odtwarzanie utworu');
+          audioWebPlayerPlayPauseIconElement.setAttribute('title', 'Rozpocznij odtwarzanie utworu');
+          audioWebPlayerProgressBarElement.tabIndex = -1;
+          refreshPlayerProgressFromSettingsFile(true);
         }
-        if (refreshPlayerProgressInterval2) {
-          clearInterval(refreshPlayerProgressInterval2);
-        }
-        if (refreshPlayerProgressInterval3) {
-          clearInterval(refreshPlayerProgressInterval3);
-        }
-        this.currentTime = 0;
-        if (audioWebPlayerContainer.hasAttribute('class') && audioWebPlayerContainer.classList.contains('audio-web-player-playing')) {
-          audioWebPlayerContainer.classList.remove('audio-web-player-playing');
-          audioWebPlayerContainer.classList.add('audio-web-player-paused');
-        }
-        audioWebPlayerPlayPauseIconElement.setAttribute('title', 'Rozpocznij odtwarzanie utworu');
-        refreshPlayerProgressFromSettingsFile(true);
       });
     }
 
@@ -406,7 +568,8 @@ document.onreadystatechange = function () {
       let currentTimeSeconds = Math.floor(audioElement.currentTime % 60);
       let durationTimeMinutes = Math.floor(audioElement.duration / 60);
       let durationTimeSeconds = Math.floor(audioElement.duration % 60);
-      audioWebPlayerProgressBarElement.firstElementChild.style.width = (audioElement.currentTime / audioElement.duration * 100) + '%';
+      audioWebPlayerProgressBarSubElement.style.width = (audioElement.currentTime / audioElement.duration * 100) + '%';
+      audioWebPlayerProgressBarElement.setAttribute('aria-valuenow', Math.round(audioElement.currentTime / audioElement.duration * 100));
       refreshPlayerTimeProgress(currentTimeMinutes, currentTimeSeconds, durationTimeMinutes, durationTimeSeconds);
     }
 
@@ -419,7 +582,8 @@ document.onreadystatechange = function () {
         durationTimeSeconds = Math.floor(settingsObject.playlist[playingTrackNumber].durationTimeSeconds);
         durationTimeMinutes = Math.floor(settingsObject.playlist[playingTrackNumber].durationTimeMinutes);
       }
-      audioWebPlayerProgressBarElement.firstElementChild.style.width = '0';
+      audioWebPlayerProgressBarSubElement.style.width = '0';
+      audioWebPlayerProgressBarElement.setAttribute('aria-valuenow', '0');
       refreshPlayerTimeProgress(currentTimeMinutes, currentTimeSeconds, durationTimeMinutes, durationTimeSeconds);
     }
 
@@ -451,35 +615,41 @@ document.onreadystatechange = function () {
       if (audioWebPlayerPlayPauseIconElement.hasAttribute('class') && audioWebPlayerPlayPauseIconElement.classList.contains('disabled')) {
         audioWebPlayerPlayPauseIconElement.classList.remove('disabled');
         audioWebPlayerPlayPauseIconElement.classList.add('enabled');
+        audioWebPlayerPlayPauseIconElement.tabIndex = startTabindexValue + 1;
       }
       if (audioWebPlayerStopIconElement.hasAttribute('class') && audioWebPlayerStopIconElement.classList.contains('disabled')) {
         audioWebPlayerStopIconElement.classList.remove('disabled');
         audioWebPlayerStopIconElement.classList.add('enabled');
+        audioWebPlayerStopIconElement.tabIndex = startTabindexValue + 2;
       }
       if (trackNumber > 0 && audioWebPlayerPrevIconElement.hasAttribute('class') && audioWebPlayerPrevIconElement.classList.contains('disabled')) {
         audioWebPlayerPrevIconElement.classList.remove('disabled');
         audioWebPlayerPrevIconElement.classList.add('enabled');
+        audioWebPlayerPrevIconElement.tabIndex = startTabindexValue;
       } else if (trackNumber <= 0 && audioWebPlayerPrevIconElement.hasAttribute('class') && audioWebPlayerPrevIconElement.classList.contains('enabled')) {
         audioWebPlayerPrevIconElement.classList.remove('enabled');
         audioWebPlayerPrevIconElement.classList.add('disabled');
+        audioWebPlayerPrevIconElement.tabIndex = -1;
       }
       if (trackNumber < settingsObject.playlist.length - 1 && audioWebPlayerNextIconElement.hasAttribute('class') && audioWebPlayerNextIconElement.classList.contains('disabled')) {
         audioWebPlayerNextIconElement.classList.remove('disabled');
         audioWebPlayerNextIconElement.classList.add('enabled');
+        audioWebPlayerNextIconElement.tabIndex = startTabindexValue + 3;
       } else if (trackNumber >= settingsObject.playlist.length - 1 && audioWebPlayerNextIconElement.hasAttribute('class') && audioWebPlayerNextIconElement.classList.contains('enabled')) {
         audioWebPlayerNextIconElement.classList.remove('enabled');
         audioWebPlayerNextIconElement.classList.add('disabled');
+        audioWebPlayerNextIconElement.tabIndex = -1;
       }
-      let audioWebPlayerPlaylistElementRows = audioWebPlayerPlaylistElement.rows;
+      var audioWebPlayerPlaylistElementRows = audioWebPlayerPlaylistElement.rows;
       for (let loop = 0; loop < audioWebPlayerPlaylistElementRows.length; loop++) {
         if (audioWebPlayerPlaylistElementRows[loop].hasAttribute('class') && audioWebPlayerPlaylistElementRows[loop].classList.contains('row-playing')) {
           audioWebPlayerPlaylistElementRows[loop].classList.remove('row-playing');
           audioWebPlayerPlaylistElementRows[loop].classList.add('row-paused');
         }
       }
-      if (settingsObject.interface.showPlaylist == true) {
-        audioWebPlayerPlaylistElement.firstElementChild.children[trackNumber].classList.remove('row-paused');
-        audioWebPlayerPlaylistElement.firstElementChild.children[trackNumber].classList.add('row-playing');
+      if (audioWebPlayerPlaylistElementRows[trackNumber].hasAttribute('class') && audioWebPlayerPlaylistElementRows[trackNumber].classList.contains('row-paused')) {
+        audioWebPlayerPlaylistElementRows[trackNumber].classList.remove('row-paused');
+        audioWebPlayerPlaylistElementRows[trackNumber].classList.add('row-playing');
       }
       if (fromBeginning === true) {
         let artistName = settingsObject.playlist[trackNumber].hasOwnProperty('artistName') ? settingsObject.playlist[trackNumber].artistName : 'Nieznany artysta';
@@ -487,44 +657,126 @@ document.onreadystatechange = function () {
         audioWebPlayerArtistNameElement.innerText = artistName;
         audioWebPlayerTrackTitleElement.innerText = trackName;
         if (settingsObject.playlist[trackNumber].hasOwnProperty('coverFile')) {
-          var albumTitleAlt = (settingsObject.playlist[trackNumber].hasOwnProperty('albumName') ? settingsObject.interface.coverImageTitle + ' ' + settingsObject.playlist[trackNumber].albumName : settingsObject.interface.coverImageWithoutTitle) + (settingsObject.playlist[trackNumber].hasOwnProperty('artistName') ? (' artysty ' + settingsObject.playlist[trackNumber].artistName) : ' nieznanego artysty') + (settingsObject.playlist[trackNumber].hasOwnProperty('releaseYear') ? (' z roku ' + settingsObject.playlist[trackNumber].releaseYear) : ' z nieznanego roku');
-          audioWebPlayerCoverImageElement.firstElementChild.src = 'audio-web-player/awp-thumbnails/' + settingsObject.playlist[trackNumber].coverFile;
-          audioWebPlayerModalWindowMainImageElement.src = 'audio-web-player/awp-covers/' + settingsObject.playlist[trackNumber].coverFile;
+          var albumTitleAlt = settingsObject.interface.coverImageTitle  + ' ' + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('artistName') ? (settingsObject.playlist[playingTrackNumber].artistName) : 'Nieznany artysta') + ' – ' + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('albumName') ? (settingsObject.playlist[playingTrackNumber].albumName) : 'Nieznany album') + ' ' + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('releaseYear') ? ('z roku ' + settingsObject.playlist[playingTrackNumber].releaseYear) : 'z nieznanego roku');
+          audioWebPlayerCoverImageThumbnailElement.src = 'awp/thumbnails/' + settingsObject.playlist[trackNumber].coverFile;
+          audioWebPlayerModalWindowMainImageElement.src = 'awp/covers/' + settingsObject.playlist[trackNumber].coverFile;
         } else {
-          audioWebPlayerCoverImageElement.firstElementChild.src = 'audio-web-player/awp-sources/album-cover-thumbnail.png';
-          audioWebPlayerModalWindowMainImageElement.src = 'audio-web-player/awp-sources/album-cover.png';
+          audioWebPlayerCoverImageThumbnailElement = 'awp/sources/album-cover-thumbnail.png';
+          audioWebPlayerModalWindowMainImageElement.src = 'awp/sources/album-cover.png';
           var albumTitleAlt = 'Brak okładki';
         }
-        audioWebPlayerCoverImageElement.firstElementChild.setAttribute('title', albumTitleAlt);
+        audioWebPlayerCoverImageThumbnailElement.setAttribute('title', albumTitleAlt);
         audioWebPlayerModalWindowMainImageElement.setAttribute('title', albumTitleAlt);
         audioWebPlayerModalWindowMainImageElement.setAttribute('alt', albumTitleAlt);
-        audioElement.src = 'audio-web-player/awp-tracks/' + settingsObject.playlist[trackNumber].trackFile;
+        audioElement.src = 'awp/tracks/' + settingsObject.playlist[trackNumber].trackFile;
         refreshPlayerProgressFromSettingsFile(true);
       }
       if (audioWebPlayerContainer.hasAttribute('class') && audioWebPlayerContainer.classList.contains('audio-web-player-stopped')) {
         audioWebPlayerContainer.classList.remove('audio-web-player-stopped');
         audioWebPlayerContainer.classList.add('audio-web-player-playing');
+        audioWebPlayerProgressBarElement.tabIndex = startTabindexValue + 5;
+        audioWebPlayerPlaylistElementRows[trackNumber].tabIndex = -1;
+        audioWebPlayerPlayPauseIconElement.setAttribute('aria-label', 'Wstrzymaj odtwarzanie utworu');
         audioWebPlayerPlayPauseIconElement.setAttribute('title', 'Wstrzymaj odtwarzanie utworu');
         audioElement.play();
         refreshPlayerProgressInterval1 = setInterval(refreshPlayerProgressFromSourceFile, 1000);
       } else if (audioWebPlayerContainer.hasAttribute('class') && audioWebPlayerContainer.classList.contains('audio-web-player-paused')) {
+        audioWebPlayerPlaylistElementRows[trackNumber].tabIndex = -1;
         audioWebPlayerContainer.classList.remove('audio-web-player-paused');
         audioWebPlayerContainer.classList.add('audio-web-player-playing');
+        audioWebPlayerProgressBarElement.tabIndex = startTabindexValue + 5;
+        audioWebPlayerPlayPauseIconElement.setAttribute('aria-label', 'Wstrzymaj odtwarzanie utworu');
         audioWebPlayerPlayPauseIconElement.setAttribute('title', 'Wstrzymaj odtwarzanie utworu');
         audioElement.play();
         refreshPlayerProgressInterval2 = setInterval(refreshPlayerProgressFromSourceFile, 1000);
       } else if (audioWebPlayerContainer.hasAttribute('class') && audioWebPlayerContainer.classList.contains('audio-web-player-playing')) {
+        for (let loop = 0; loop < audioWebPlayerPlaylistElementRows.length; loop++) {
+          if (loop == trackNumber) {
+            audioWebPlayerPlaylistElementRows[loop].tabIndex = -1;
+          } else {
+            audioWebPlayerPlaylistElementRows[loop].tabIndex = loop + startTabindexValue + 6;
+          }
+        }
         if (fromBeginning === true) {
+          audioWebPlayerProgressBarElement.tabIndex = startTabindexValue + 5;
+          audioWebPlayerPlayPauseIconElement.setAttribute('aria-label', 'Wstrzymaj odtwarzanie utworu');
           audioWebPlayerPlayPauseIconElement.setAttribute('title', 'Wstrzymaj odtwarzanie utworu');
           audioElement.play();
           refreshPlayerProgressInterval3 = setInterval(refreshPlayerProgressFromSourceFile, 1000);
         } else if (fromBeginning === false) {
           audioWebPlayerContainer.classList.remove('audio-web-player-playing');
           audioWebPlayerContainer.classList.add('audio-web-player-paused');
+          audioWebPlayerProgressBarElement.tabIndex = -1;
+          audioWebPlayerPlaylistElementRows[trackNumber].tabIndex = -1;
+          audioWebPlayerPlayPauseIconElement.setAttribute('aria-label', 'Kontynuuj odtwarzanie utworu');
           audioWebPlayerPlayPauseIconElement.setAttribute('title', 'Kontynuuj odtwarzanie utworu');
           audioElement.pause();
         }
       }
+    }
+
+    function stopTrack() {
+      if (refreshPlayerProgressInterval1) {
+        clearInterval(refreshPlayerProgressInterval1);
+      }
+      if (refreshPlayerProgressInterval2) {
+        clearInterval(refreshPlayerProgressInterval2);
+      }
+      if (refreshPlayerProgressInterval3) {
+        clearInterval(refreshPlayerProgressInterval3);
+      }
+      if (audioWebPlayerContainer.hasAttribute('class') && (audioWebPlayerContainer.classList.contains('audio-web-player-playing') || audioWebPlayerContainer.classList.contains('audio-web-player-paused'))) {
+        if (audioWebPlayerContainer.classList.contains('audio-web-player-playing')) {
+          audioWebPlayerContainer.classList.remove('audio-web-player-playing');
+        }
+        if (audioWebPlayerContainer.classList.contains('audio-web-player-paused')) {
+          audioWebPlayerContainer.classList.remove('audio-web-player-paused');
+        }
+        audioWebPlayerContainer.classList.add('audio-web-player-stopped');
+        audioElement.pause();
+        audioElement.currentTime = 0;
+        audioWebPlayerTrackTitleElement.innerText = settingsObject.interface.trackTitleStopped;
+        audioWebPlayerArtistNameElement.innerText = settingsObject.interface.artistNameStopped;
+        audioWebPlayerModalWindowMainImageElement.id = 'audio-web-player-modal-window-main-image';
+        audioWebPlayerModalWindowMainImageElement.src = 'awp/sources/album-cover.png';
+        audioWebPlayerModalWindowMainImageElement.setAttribute('alt', settingsObject.interface.coverImageTitle);
+        audioWebPlayerModalWindowMainImageElement.setAttribute('title', settingsObject.interface.coverImageTitle);
+        audioWebPlayerCoverImageThumbnailElement.src = 'awp/sources/album-cover-thumbnail.png';
+        audioWebPlayerCoverImageThumbnailElement.setAttribute('alt', settingsObject.interface.coverImageTitle);
+        audioWebPlayerCoverImageThumbnailElement.setAttribute('title', settingsObject.interface.coverImageTitle);
+        if (audioWebPlayerPrevIconElement.hasAttribute('class') && audioWebPlayerPrevIconElement.classList.contains('enabled')) {
+          audioWebPlayerPrevIconElement.classList.remove('enabled');
+          audioWebPlayerPrevIconElement.classList.add('disabled');
+          audioWebPlayerPrevIconElement.tabIndex = -1;
+        }
+        if (audioWebPlayerPlayPauseIconElement.hasAttribute('class') && audioWebPlayerPlayPauseIconElement.classList.contains('enabled')) {
+          audioWebPlayerPlayPauseIconElement.classList.remove('enabled');
+          audioWebPlayerPlayPauseIconElement.classList.add('disabled');
+          audioWebPlayerPlayPauseIconElement.tabIndex = -1;
+        }
+        if (audioWebPlayerNextIconElement.hasAttribute('class') && audioWebPlayerNextIconElement.classList.contains('enabled')) {
+          audioWebPlayerNextIconElement.classList.remove('enabled');
+          audioWebPlayerNextIconElement.classList.add('disabled');
+          audioWebPlayerNextIconElement.tabIndex = -1;
+        }
+        if (audioWebPlayerStopIconElement.hasAttribute('class') && audioWebPlayerStopIconElement.classList.contains('enabled')) {
+          audioWebPlayerStopIconElement.classList.remove('enabled');
+          audioWebPlayerStopIconElement.classList.add('disabled');
+          audioWebPlayerStopIconElement.tabIndex = -1;
+        }
+        audioWebPlayerProgressBarElement.tabIndex = -1;
+        audioWebPlayerPlayPauseIconElement.setAttribute('aria-label', 'Rozpocznij odtwarzanie utworu');
+        audioWebPlayerPlayPauseIconElement.setAttribute('title', 'Rozpocznij odtwarzanie utworu');
+        var audioWebPlayerPlaylistElementRows = audioWebPlayerPlaylistElement.rows;
+        for (var loop = 0; loop < audioWebPlayerPlaylistElementRows.length; loop++) {
+          if (audioWebPlayerPlaylistElementRows[loop].hasAttribute('class') && audioWebPlayerPlaylistElementRows[loop].classList.contains('row-playing')) {
+            audioWebPlayerPlaylistElementRows[loop].classList.remove('row-playing');
+            audioWebPlayerPlaylistElementRows[loop].classList.add('row-paused');
+            audioWebPlayerPlaylistElementRows[loop].tabIndex = loop + startTabindexValue + 6;
+          }
+        }
+      }
+      refreshPlayerProgressFromSettingsFile();
     }
 
   }

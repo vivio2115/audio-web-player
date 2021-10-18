@@ -5,28 +5,78 @@
 		<title>Audio Web Player</title>
 		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 		<meta name="description" content="Przykład użycia i zamieszczenia na własnej stronie internetowej webowego odtwrzacza plików dzwiękowych" />
-		<meta name="keywords" content="audio web player, przykład odtwrzacza plików dzwiękowych, jak zmieścić na własnej stronie internetowej odtwrzacz MP3" />
+		<meta name="keywords" content="audio web player, odtwarzacz plików dzwiękowych, jak stworzyć i zmieścić na własnej stronie internetowej odtwrzacz mp3" />
 		<meta name="author" content="Wojciech Łasocha" />
 		<meta name="creator" content="Wojciech Łasocha" />
 		<link href="favicon.ico" rel="icon" type="image/png" />
-		<link href="audio-web-player/awp-sources/awp-dark-theme.min.css" rel="stylesheet" />
-		<script src="audio-web-player/awp-sources/awp.min.js"></script>
+		<link href="awp/sources/awp.min.css" rel="stylesheet" />
+		<link href="awp/sources/awp-light-theme.min.css" rel="stylesheet" title="Jasny motyw" />
+		<link href="awp/sources/awp-dark-theme.min.css" rel="stylesheet" title="Ciemny motyw" disabled />
+		<script src="awp/sources/awp.min.js"></script>
 		<style>
 			html, body {
 				margin: 0;
 				padding: 0;
-				width: 100%;
-				height: 100%;
 			}
 			body {
-				display: flex;
-				align-items: center;
-				background-image: linear-gradient(hsl(0, 0%, 15%), hsl(0, 0%, 55%));
+				padding: 12px;
+				background-repeat: no-repeat;
 				background-size: 100% 100%;
+			}
+			body > nav {
+				display: block;
+				margin: 20px auto;
+				text-align: center;
+			}
+			body > nav > button {
+				margin: 5px;
+				padding: 5px 15px;
+				font-size: 14pt;
+				font-family: 'Roboto', sans-serif;
+				border-radius: 10px;
+			}
+			body.light-theme {
+				background-color: hsl(205, 100%, 70%);
+				background-image: linear-gradient(hsl(225, 100%, 65%), hsl(205, 100%, 70%));
+			}
+			body.light-theme > nav > button {
+				color: rgb(5, 55, 95);
+				border: 1px solid rgb(5, 55, 95);
+				background-color: rgb(205, 220, 247);
+			}
+			body.dark-theme {
+				background-color: hsl(0, 0%, 55%);
+				background-image: linear-gradient(hsl(0, 0%, 15%), hsl(0, 0%, 55%));
+			}
+			body.dark-theme > nav > button {
+				color: rgb(210, 212, 245);
+				border: 1px solid rgb(210, 212, 245);
+				background-color: rgb(50, 51, 54);
 			}
 		</style>
 	</head>
-	<body>
+	<body class="light-theme">
 		<div id="audio-web-player"></div>
+		<nav>
+			<button type="button" title="Jasny motyw" data-theme="light-theme">Jasny motyw</button>
+			<button type="button" title="Ciemny motyw" data-theme="dark-theme">Ciemny motyw</button>
+		</nav>
+		<script>
+				const linkElements = document.getElementsByTagName('link');
+				const buttonElements = document.getElementsByTagName('button');
+				for (let loop = 0; loop < buttonElements.length; loop++) {
+					buttonElements[loop].addEventListener('click', function() {
+						for (let loop2 = 0; loop2 < linkElements.length; loop2++) {
+							if (linkElements[loop2].hasAttribute('rel') && linkElements[loop2].getAttribute('rel') == 'stylesheet' && linkElements[loop2].hasAttribute('title')) {
+								linkElements[loop2].disabled = true;
+								if (this.hasAttribute('title') && linkElements[loop2].getAttribute('title') == this.getAttribute('title')) {
+									linkElements[loop2].disabled = false;
+									document.body.className = this.getAttribute('data-theme');
+								}
+							}
+						}
+					});
+				}
+		</script>
 	</body>
 </html>
