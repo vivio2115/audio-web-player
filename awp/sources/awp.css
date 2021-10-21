@@ -52,10 +52,9 @@ div#audio-web-player-cover-image {
   cursor: -moz-zoom-in;
   cursor: -webkit-zoom-in;
   cursor: zoom-in;
-  overflow: hidden;
 }
 
-@media (min-width: 450px) {
+@media (min-width: 470px) {
   div#audio-web-player-cover-image {
     float: left;
     width: 136px;
@@ -65,22 +64,29 @@ div#audio-web-player-cover-image {
   }
 }
 
-div#audio-web-player-cover-image > img {
-  display: block;
-  position: absolute;
-  left: 50%;
-  top: 50%;
+div#audio-web-player-cover-image > div {
   width: 100%;
-  transform: translate(-50%, -50%);
+  height: 0;
+  padding-bottom: 100%;
+  opacity: 100%;
+  background-image: url('album-cover-thumbnail.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  background-clip: padding-box;
   transition: all 0.4s;
 }
 
-div#audio-web-player-cover-image:hover > img {
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 0.7;
-  transform: scale(1.35);
+@media (min-width: 470px) {
+  div#audio-web-player-cover-image > div {
+    padding-bottom: 0;
+    height: 100%;
+  }
+}
+
+div#audio-web-player-cover-image:hover > div {
+  opacity: 70%;
+  background-size: 135% 135%;
   transition: all 0.4s;
 }
 

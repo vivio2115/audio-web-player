@@ -15,7 +15,8 @@
     "timeFormat": "$cur_min_1$:$cur_sec_2$ / $dur_min_1$:$dur_sec_2$",
     "playlistItemTitleFormat": "$artist_name$ &ndash; $track_name$ [$dur_min_1$:$dur_sec_2$]",
     "playlistItemSubtitleFormat": "z&nbsp;albumu $album_name$ z&nbsp;roku $release_year$",
-    "selectedTrack": "none"
+    "selectedTrack": "none",
+    "waiAriaStartTabIndex": "auto"
   },
   "playlist": [
     {

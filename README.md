@@ -46,7 +46,8 @@ Wersja 4: Wraz z ukazaniem się czwartej wersji aplikacji, odtwarzacz stał się
           "timeFormat": "$cur_min_1$:$cur_sec_2$ / $dur_min_1$:$dur_sec_2$",
           "playlistItemTitleFormat": "$artist_name$ – $track_name$ [$dur_min_1$:$dur_sec_2$]",
           "playlistItemSubtitleFormat": "z albumu $album_name$ z roku $release_year$",
-          "selectedTrack": "none"
+          "selectedTrack": "none",
+          "waiAriaStartTabIndex": "auto"
         },
         "playlist": [
           {
@@ -82,7 +83,7 @@ Wersja 4: Wraz z ukazaniem się czwartej wersji aplikacji, odtwarzacz stał się
         ]
       }
       ```
-7. Obiekt *interface* reprezentujący strukturę interfejsu aplikacji obowiązkowo musi składać się z 16 następujących pól wraz z przypisanymi wartościami:
+7. Obiekt *interface* reprezentujący strukturę interfejsu aplikacji obowiązkowo musi składać się z 17 następujących pól wraz z przypisanymi wartościami:
       - *"headerTitle":* – dowolny tytuł aplikacji
       - *"trackTitleStopped":* – dowolny tekst wyświetlany w miejscu tytułu utworu, gdy odtwarzanie jest zatrzymane
       - *"artistNameStopped":* – dowolny tekst wyświetlany w miejscu nazwy artysty, gdy odtwarzanie jest zatrzymane
@@ -108,7 +109,8 @@ Wersja 4: Wraz z ukazaniem się czwartej wersji aplikacji, odtwarzacz stał się
       - *"playlistItemSubtitleFormat":* – określa format wyświetlanego formatu podtytułu każdej pozycji w liście odtwarzania, zamieniając zmienne ujęte pomiędzy znakami dolarów na rzczywiste wartości; poniżej przedstawiono przykładowe prawidłowe zapisy wartości pola *"playlistItemSubtitleFormat":*:
           - *"z albumu $album_name$ z roku $release_year$"* – wyświetla podtytuł każdej pozycji w formacie: z albumu  Nazwa albumu z roku 0000
           - *"z albumu $album_name$ w wykonaniu $artist_name$"* – wyświetla podtytuł każdej pozycji w formacie: z albumu  Nazwa albumu w wykonaniu Nazwa artysty
-       - *"selectedTrack":* – numer domyślnie wczytywanego i wybieranego utworu z listy odtwarzania po uruchomieniu aplikacji (*1* oznacza pierwszy utwór, *3* to trzeci utwór, itd., wpisanie *"none"* oznacza, że żaden utwór nie zostanie wstępnie wczytany i wybrany (jest to domyślne ustawienie)
+       - *"selectedTrack":* – numer domyślnie wczytywanego i wybieranego utworu z listy odtwarzania po uruchomieniu aplikacji (*1* oznacza pierwszy utwór, *3* to trzeci utwór, itd.), wpisanie *"none"* oznacza, że żaden utwór nie zostanie wstępnie wczytany i wybrany (jest to domyślne ustawienie)
+       - *"waiAriaStartTabIndex":* – numer od jakiego ma zostać rozpoczęte przypisywanie wartości atrybutom *tabindex* elementom nawigacyjnym programu według zasad WAI-ARIA (wpisanie *auto* oznacza rozpoczęcie od kolejnego po ostatnim numerze elementu nawigacyjnym całej strony internetowej i jest to domyślne ustawienie)
 
 8. Każdy obiekt z tablicy obiektów playlist reprezentujący poszczególny utwór z listy odtwarzania powinien (choć nie musi) składać się z 8 następujących pól wraz z przypisanymi wartościami:
      - *"artistName":* – nazwa artysty utworu

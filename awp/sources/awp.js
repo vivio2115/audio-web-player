@@ -8,14 +8,8 @@ document.onreadystatechange = function () {
     var refreshPlayerProgressInterval1;
     var refreshPlayerProgressInterval2;
     var refreshPlayerProgressInterval3;
-
-    var focusableElements = document.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
     var startTabindexValue = 0;
-    for (let loop = 0; loop < focusableElements.length; loop++) {
-      if (focusableElements[loop].hasAttribute('tabindex') && parseInt(focusableElements[loop].tabIndex) > startTabindexValue) {
-        startTabindexValue = focusableElements[loop].tabIndex + 1;
-      }
-    }
+
     var audioWebPlayerContainer = document.getElementById('audio-web-player');
     var audioWebPlayerModalWindowWrapperElement = document.createElement('div');
     audioWebPlayerModalWindowWrapperElement.id = 'audio-web-player-modal-window-wrapper';
@@ -38,11 +32,11 @@ document.onreadystatechange = function () {
     var audioElement = document.createElement('audio');
     var headerTitleElement = document.createElement('h1');
     var audioWebPlayerSubElement = document.createElement('div');
-    var audioWebPlayerCoverImageContainer = document.createElement('div');
-    audioWebPlayerCoverImageContainer.id = 'audio-web-player-cover-image';
-    var audioWebPlayerCoverImageThumbnailElement = document.createElement('img');
-    audioWebPlayerCoverImageContainer.appendChild(audioWebPlayerCoverImageThumbnailElement);
-    audioWebPlayerSubElement.appendChild(audioWebPlayerCoverImageContainer);
+    var audioWebPlayerCoverImageElement = document.createElement('div');
+    audioWebPlayerCoverImageElement.id = 'audio-web-player-cover-image';
+    var audioWebPlayerCoverImageSubElement = document.createElement('div');
+    audioWebPlayerCoverImageElement.appendChild(audioWebPlayerCoverImageSubElement);
+    audioWebPlayerSubElement.appendChild(audioWebPlayerCoverImageElement);
     var audioWebPlayerControlsElement = document.createElement('div');
     audioWebPlayerControlsElement.id = 'audio-web-player-current-track';
     audioWebPlayerSubElement.appendChild(audioWebPlayerControlsElement);
@@ -91,7 +85,6 @@ document.onreadystatechange = function () {
     audioWebPlayerControlsContainerElement.appendChild(audioWebPlayerNextIconElement);
     audioWebPlayerVolumeKnobIconElement = document.createElement('div');
     audioWebPlayerVolumeKnobIconElement.id = 'audio-web-player-volume-knob-icon';
-    audioWebPlayerVolumeKnobIconElement.tabIndex = startTabindexValue + 4;
     audioWebPlayerVolumeKnobIconElement.setAttribute('role', 'slider');
     audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuemin', '0');
     audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuemax', '100');
@@ -103,7 +96,6 @@ document.onreadystatechange = function () {
     audioWebPlayerControlsSubTwoElement.appendChild(audioWebPlayerProgressTimeElement);
     var audioWebPlayerProgressBarElement = document.createElement('div');
     audioWebPlayerProgressBarElement.id = 'audio-web-player-progress-bar';
-    audioWebPlayerProgressBarElement.tabIndex = -1;
     audioWebPlayerProgressBarElement.setAttribute('role', 'progressbar');
     audioWebPlayerProgressBarElement.setAttribute('aria-valuenow', '0');
     audioWebPlayerProgressBarElement.setAttribute('aria-valuemin', '0');
@@ -116,6 +108,8 @@ document.onreadystatechange = function () {
     var audioWebPlayerHeaderSubtitleElement = document.createElement('div');
     var audioWebPlayerPlaylistElement = document.createElement('table');
 
+    var focusableElements = document.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+
     if (window.location.protocol == 'http:' || window.location.protocol == 'https:') {
       var request = new XMLHttpRequest();
       request.open('GET', 'awp/sources/settings.json', true);
@@ -124,7 +118,16 @@ document.onreadystatechange = function () {
         if (request.readyState === 4 && request.status === 200) {
           try {
             settingsObject = JSON.parse(request.responseText);
-            if (settingsObject.interface.setVolumeOfSound == "full") {
+            if (settingsObject.interface.waiAriaStartTabIndex == 'auto') {
+              for (let loop = 0; loop < focusableElements.length; loop++) {
+                if (focusableElements[loop].hasAttribute('tabindex') && parseInt(focusableElements[loop].tabIndex) > startTabindexValue) {
+                  startTabindexValue = focusableElements[loop].tabIndex + 1;
+                }
+              }
+            } else {
+              startTabindexValue = parseInt(settingsObject.interface.waiAriaStartTabIndex);
+            }
+            if (settingsObject.interface.setVolumeOfSound == 'full') {
               volumeControlAngle = 135;
               audioElement.volume =  1;
               audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', '100');
@@ -133,6 +136,7 @@ document.onreadystatechange = function () {
               audioElement.volume =  parseFloat(settingsObject.interface.setVolumeOfSound) / 100;
               audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.round(settingsObject.interface.setVolumeOfSound));
             }
+            audioWebPlayerVolumeKnobIconElement.tabIndex = startTabindexValue + 4;
             headerTitleElement.innerHTML = settingsObject.interface.headerTitle;
             audioWebPlayerModalWindowMainImageElement.id = 'audio-web-player-modal-window-main-image';
             if (settingsObject.interface.showPreviousButton == true) {
@@ -288,6 +292,7 @@ document.onreadystatechange = function () {
                 }, false);
               }
             }
+            audioWebPlayerProgressBarElement.tabIndex = -1;
             if (settingsObject.interface.selectedTrack == 'none') {
               audioWebPlayerContainer.className = 'audio-web-player-stopped';
               audioWebPlayerPrevIconElement.tabIndex = -1;
@@ -299,10 +304,8 @@ document.onreadystatechange = function () {
               audioWebPlayerModalWindowMainImageElement.src = 'awp/sources/album-cover.png';
               audioWebPlayerModalWindowMainImageElement.setAttribute('alt', settingsObject.interface.coverImageTitle);
               audioWebPlayerModalWindowMainImageElement.setAttribute('title', settingsObject.interface.coverImageTitle);
-              audioWebPlayerCoverImageThumbnailElement.src = 'awp/sources/album-cover-thumbnail.png';
-              audioWebPlayerCoverImageThumbnailElement.setAttribute('alt', settingsObject.interface.coverImageTitle);
-              audioWebPlayerCoverImageThumbnailElement.setAttribute('title', settingsObject.interface.coverImageTitle);
-              audioWebPlayerCoverImageContainer.setAttribute('title', settingsObject.interface.coverImageTitle);
+              audioWebPlayerCoverImageSubElement.style.backgroundImage = 'url(\'awp/sources/album-cover-thumbnail.png\')';
+              audioWebPlayerCoverImageSubElement.setAttribute('title', settingsObject.interface.coverImageTitle);
               if (audioWebPlayerPlayPauseIconElement.hasAttribute('class')) {
                 audioWebPlayerPlayPauseIconElement.classList.add('disabled');
               }
@@ -324,14 +327,14 @@ document.onreadystatechange = function () {
               audioWebPlayerTrackTitleElement.innerText = trackName;
               if (settingsObject.playlist[playingTrackNumber].hasOwnProperty('coverFile')) {
                 var albumTitleAlt = settingsObject.interface.coverImageTitle  + ' ' + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('artistName') ? (settingsObject.playlist[playingTrackNumber].artistName) : 'Nieznany artysta') + ' – ' + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('albumName') ? (settingsObject.playlist[playingTrackNumber].albumName) : 'Nieznany album') + ' ' + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('releaseYear') ? ('z roku ' + settingsObject.playlist[playingTrackNumber].releaseYear) : 'z nieznanego roku');
-                audioWebPlayerCoverImageThumbnailElement.src = 'awp/thumbnails/' + settingsObject.playlist[playingTrackNumber].coverFile;
+                audioWebPlayerCoverImageSubElement.style.backgroundImage = 'url(\'awp/thumbnails/' + settingsObject.playlist[playingTrackNumber].coverFile + '\')';
                 audioWebPlayerModalWindowMainImageElement.src = 'awp/covers/' + settingsObject.playlist[playingTrackNumber].coverFile;
               } else {
-                audioWebPlayerCoverImageThumbnailElement = 'awp/sources/album-cover-thumbnail.png';
+                audioWebPlayerCoverImageSubElement.style.backgroundImage = 'url(\'awp/sources/album-cover-thumbnail.png\')';
                 audioWebPlayerModalWindowMainImageElement.src = 'awp/sources/album-cover.png';
                 var albumTitleAlt = 'Brak okładki';
               }
-              audioWebPlayerCoverImageThumbnailElement.setAttribute('title', albumTitleAlt);
+              audioWebPlayerCoverImageSubElement.setAttribute('title', albumTitleAlt);
               audioWebPlayerModalWindowMainImageElement.setAttribute('title', albumTitleAlt);
               audioWebPlayerModalWindowMainImageElement.setAttribute('alt', albumTitleAlt);
               audioElement.src = 'awp/tracks/' + settingsObject.playlist[playingTrackNumber].trackFile;
@@ -513,8 +516,8 @@ document.onreadystatechange = function () {
       });
     }
 
-    if (!!audioWebPlayerCoverImageContainer) {
-      audioWebPlayerCoverImageContainer.addEventListener('click', function() {
+    if (!!audioWebPlayerCoverImageSubElement) {
+      audioWebPlayerCoverImageSubElement.addEventListener('click', function() {
         if (audioWebPlayerModalWindowWrapperElement.hasAttribute('class') && audioWebPlayerModalWindowWrapperElement.classList.contains('not-displayed')) {
           audioWebPlayerModalWindowWrapperElement.classList.remove('not-displayed');
           audioWebPlayerModalWindowWrapperElement.classList.add('displayed');
@@ -658,14 +661,14 @@ document.onreadystatechange = function () {
         audioWebPlayerTrackTitleElement.innerText = trackName;
         if (settingsObject.playlist[trackNumber].hasOwnProperty('coverFile')) {
           var albumTitleAlt = settingsObject.interface.coverImageTitle  + ' ' + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('artistName') ? (settingsObject.playlist[playingTrackNumber].artistName) : 'Nieznany artysta') + ' – ' + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('albumName') ? (settingsObject.playlist[playingTrackNumber].albumName) : 'Nieznany album') + ' ' + (settingsObject.playlist[playingTrackNumber].hasOwnProperty('releaseYear') ? ('z roku ' + settingsObject.playlist[playingTrackNumber].releaseYear) : 'z nieznanego roku');
-          audioWebPlayerCoverImageThumbnailElement.src = 'awp/thumbnails/' + settingsObject.playlist[trackNumber].coverFile;
+          audioWebPlayerCoverImageSubElement.style.backgroundImage = 'url(\'awp/thumbnails/' + settingsObject.playlist[trackNumber].coverFile + '\')';
           audioWebPlayerModalWindowMainImageElement.src = 'awp/covers/' + settingsObject.playlist[trackNumber].coverFile;
         } else {
-          audioWebPlayerCoverImageThumbnailElement = 'awp/sources/album-cover-thumbnail.png';
+          audioWebPlayerCoverImageSubElement.style.backgroundImage = 'url(\'awp/sources/album-cover-thumbnail.png\')';
           audioWebPlayerModalWindowMainImageElement.src = 'awp/sources/album-cover.png';
           var albumTitleAlt = 'Brak okładki';
         }
-        audioWebPlayerCoverImageThumbnailElement.setAttribute('title', albumTitleAlt);
+        audioWebPlayerCoverImageSubElement.setAttribute('title', albumTitleAlt);
         audioWebPlayerModalWindowMainImageElement.setAttribute('title', albumTitleAlt);
         audioWebPlayerModalWindowMainImageElement.setAttribute('alt', albumTitleAlt);
         audioElement.src = 'awp/tracks/' + settingsObject.playlist[trackNumber].trackFile;
@@ -741,9 +744,8 @@ document.onreadystatechange = function () {
         audioWebPlayerModalWindowMainImageElement.src = 'awp/sources/album-cover.png';
         audioWebPlayerModalWindowMainImageElement.setAttribute('alt', settingsObject.interface.coverImageTitle);
         audioWebPlayerModalWindowMainImageElement.setAttribute('title', settingsObject.interface.coverImageTitle);
-        audioWebPlayerCoverImageThumbnailElement.src = 'awp/sources/album-cover-thumbnail.png';
-        audioWebPlayerCoverImageThumbnailElement.setAttribute('alt', settingsObject.interface.coverImageTitle);
-        audioWebPlayerCoverImageThumbnailElement.setAttribute('title', settingsObject.interface.coverImageTitle);
+        audioWebPlayerCoverImageSubElement.style.backgroundImage = 'url(\'awp/sources/album-cover-thumbnail.png\')';
+        audioWebPlayerCoverImageSubElement.setAttribute('title', settingsObject.interface.coverImageTitle);
         if (audioWebPlayerPrevIconElement.hasAttribute('class') && audioWebPlayerPrevIconElement.classList.contains('enabled')) {
           audioWebPlayerPrevIconElement.classList.remove('enabled');
           audioWebPlayerPrevIconElement.classList.add('disabled');
