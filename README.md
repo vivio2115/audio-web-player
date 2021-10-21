@@ -84,33 +84,33 @@ Wersja 4: Wraz z ukazaniem się czwartej wersji aplikacji, odtwarzacz stał się
       }
       ```
 7. Obiekt *interface* reprezentujący strukturę interfejsu aplikacji obowiązkowo musi składać się z 17 następujących pól wraz z przypisanymi wartościami:
-      - *"headerTitle":* – dowolny tytuł aplikacji
-      - *"trackTitleStopped":* – dowolny tekst wyświetlany w miejscu tytułu utworu, gdy odtwarzanie jest zatrzymane
-      - *"artistNameStopped":* – dowolny tekst wyświetlany w miejscu nazwy artysty, gdy odtwarzanie jest zatrzymane
-      - *"coverImageTitle":* – dowolny tekst dodawany przed nazwą okładki albumu
-      - *"playlistHeaderSubtitle":* – dowolny tekst wyświetlany przed listą odtwarzania
-      - *"showPlaylist":* – ustawić *true* jeśli lista odtwarzania ma być wyświetlana lub *false* w przeciwnym wypadku
-      - *"playlistContinuous":* – ustawić *true* jeśli odtwarzanie kolejnych utworów ma przebiegać automatycznie lub *false* w przeciwnym wypadku
-      - *"showPreviousButton":* – ustawić *true* jeśli przycisk zmiany utworu na poprzedni ma być wyświetlany lub *false* w przeciwnym wypadku
-      - *"showNextButton":* – ustawić *true* jeśli przycisk zmiany utworu na następny ma być wyświetlany lub *false* w przeciwnym wypadku
-      - *"showStopButton":* – ustawić *true* jeśli przycisk zatrzymania odtwarzania utworu ma być wyświetlany lub false w przeciwnym wypadku
-      - "showVolumeKnob": – ustawić true jeśli pokrętło zmiany poziomu głośności ma być wyświetlane lub *false* w przeciwnym wypadku
-      - *"setVolumeOfSound":* – poziom poziomu głośności po uruchomieniu aplikacji ustawianej z zakresu od *0* do *100* (sama liczba bez innych dodakowych znaków), wpisanie *"full"* oznacza pełną głośność (jest to domyślne ustawienie)
-      - *"timeFormat":* – określa format wyświetlanego formatu aktualnego czasu zamieniając zmienne ujęte pomiędzy znakami dolarów na rzczywiste wartości; poniżej przedstawiono przykładowe prawidłowe zapisy wartości pola *"timeFormat":*:
+     - *"headerTitle":* – dowolny tytuł aplikacji
+     - *"trackTitleStopped":* – dowolny tekst wyświetlany w miejscu tytułu utworu, gdy odtwarzanie jest zatrzymane
+     - *"artistNameStopped":* – dowolny tekst wyświetlany w miejscu nazwy artysty, gdy odtwarzanie jest zatrzymane
+     - *"coverImageTitle":* – dowolny tekst dodawany przed nazwą okładki albumu
+     - *"playlistHeaderSubtitle":* – dowolny tekst wyświetlany przed listą odtwarzania
+     - *"showPlaylist":* – ustawić *true* jeśli lista odtwarzania ma być wyświetlana lub *false* w przeciwnym wypadku
+     - *"playlistContinuous":* – ustawić *true* jeśli odtwarzanie kolejnych utworów ma przebiegać automatycznie lub *false* w przeciwnym wypadku
+     - *"showPreviousButton":* – ustawić *true* jeśli przycisk zmiany utworu na poprzedni ma być wyświetlany lub *false* w przeciwnym wypadku
+     - *"showNextButton":* – ustawić *true* jeśli przycisk zmiany utworu na następny ma być wyświetlany lub *false* w przeciwnym wypadku
+     - *"showStopButton":* – ustawić *true* jeśli przycisk zatrzymania odtwarzania utworu ma być wyświetlany lub false w przeciwnym wypadku
+     - "showVolumeKnob": – ustawić true jeśli pokrętło zmiany poziomu głośności ma być wyświetlane lub *false* w przeciwnym wypadku
+     - *"setVolumeOfSound":* – poziom poziomu głośności po uruchomieniu aplikacji ustawianej z zakresu od *0* do *100* (sama liczba bez innych dodakowych znaków), wpisanie *"full"* oznacza pełną głośność (jest to domyślne ustawienie)
+     - *"timeFormat":* – określa format wyświetlanego formatu aktualnego czasu zamieniając zmienne ujęte pomiędzy znakami dolarów na rzczywiste wartości; poniżej przedstawiono przykładowe prawidłowe zapisy wartości pola *"timeFormat":*:
           - *"$cur_min_1$:$cur_sec_2$ / $dur_min_1$:$dur_sec_2$"* – wyświetla czas w formacie: 0:00 / 0:00
           - *"$cur_min_2$:$cur_sec_2$ / $dur_min_2$:$dur_sec_2$"* – wyświetla czas w formacie: 00:00 / 00:00
           - *"upłynęło $cur_min_1$ minut i $dur_sec_1$ sekund"* – wyświetla czas w formacie: upłynęło 0 minut i 0 sekund
           - *"czas trwania: $dur_min_1$ min. i $dur_sec_2$ sek."* – wyświetla czas w formacie: czas trwania: 0 min. i 00 sek.
           - *"$full_cur_sec_1$ sek. z $full_dur_sec_3$ sek."* – wyświetla czas w formacie: 0 sek. z 000 sek.
-      - *"playlistItemTitleFormat":* – określa format wyświetlanego formatu tytułu każdej pozycji w liście odtwarzania, zamieniając zmienne ujęte pomiędzy znakami dolarów na rzczywiste wartości; poniżej przedstawiono przykładowe prawidłowe zapisy wartości pola *"playlistItemTitleFormat":*:
+     - *"playlistItemTitleFormat":* – określa format wyświetlanego formatu tytułu każdej pozycji w liście odtwarzania, zamieniając zmienne ujęte pomiędzy znakami dolarów na rzczywiste wartości; poniżej przedstawiono przykładowe prawidłowe zapisy wartości pola *"playlistItemTitleFormat":*:
           - *"$track_name$ o czasie trwania $dur_min_1$ min. i $dur_sec_1$ sek."* – wyświetla tytuł każdej pozycji w formacie: Nazwa utworu o czasie trwania 0 min. i 0 sek.
           - *"$artist_name$ – $track_name$ [$dur_min_1$:$dur_sec_2$]"* – wyświetla tytuł każdej pozycji w formacie: Nazwa artysty – Nazwa utworu [0:00]
           - *"utwór $track_name$ w wykonaniu $artist_name$ o długości $full_dur_sec_3$ sek."* – wyświetla tytuł każdej pozycji w formacie: utwór Tytuł utworu w wykonaniu Nazwa artysty o długości 000 sek.
-      - *"playlistItemSubtitleFormat":* – określa format wyświetlanego formatu podtytułu każdej pozycji w liście odtwarzania, zamieniając zmienne ujęte pomiędzy znakami dolarów na rzczywiste wartości; poniżej przedstawiono przykładowe prawidłowe zapisy wartości pola *"playlistItemSubtitleFormat":*:
+     - *"playlistItemSubtitleFormat":* – określa format wyświetlanego formatu podtytułu każdej pozycji w liście odtwarzania, zamieniając zmienne ujęte pomiędzy znakami dolarów na rzczywiste wartości; poniżej przedstawiono przykładowe prawidłowe zapisy wartości pola *"playlistItemSubtitleFormat":*:
           - *"z albumu $album_name$ z roku $release_year$"* – wyświetla podtytuł każdej pozycji w formacie: z albumu  Nazwa albumu z roku 0000
           - *"z albumu $album_name$ w wykonaniu $artist_name$"* – wyświetla podtytuł każdej pozycji w formacie: z albumu  Nazwa albumu w wykonaniu Nazwa artysty
-       - *"selectedTrack":* – numer domyślnie wczytywanego i wybieranego utworu z listy odtwarzania po uruchomieniu aplikacji (*1* oznacza pierwszy utwór, *3* to trzeci utwór, itd.), wpisanie *"none"* oznacza, że żaden utwór nie zostanie wstępnie wczytany i wybrany (jest to domyślne ustawienie)
-       - *"waiAriaStartTabIndex":* – numer od jakiego ma zostać rozpoczęte przypisywanie wartości atrybutom *tabindex* elementom nawigacyjnym programu według zasad WAI-ARIA (wpisanie *auto* oznacza rozpoczęcie od kolejnego po ostatnim numerze elementu nawigacyjnym całej strony internetowej i jest to domyślne ustawienie)
+     - *"selectedTrack":* – numer domyślnie wczytywanego i wybieranego utworu z listy odtwarzania po uruchomieniu aplikacji (*1* oznacza pierwszy utwór, *3* to trzeci utwór, itd.), wpisanie *"none"* oznacza, że żaden utwór nie zostanie wstępnie wczytany i wybrany (jest to domyślne ustawienie)
+     - *"waiAriaStartTabIndex":* – numer od jakiego ma zostać rozpoczęte przypisywanie wartości atrybutom *tabindex* elementom nawigacyjnym programu według zasad WAI-ARIA (wpisanie *auto* oznacza rozpoczęcie od kolejnego po ostatnim numerze elementu nawigacyjnym całej strony internetowej i jest to domyślne ustawienie)
 
 8. Każdy obiekt z tablicy obiektów playlist reprezentujący poszczególny utwór z listy odtwarzania powinien (choć nie musi) składać się z 8 następujących pól wraz z przypisanymi wartościami:
      - *"artistName":* – nazwa artysty utworu
