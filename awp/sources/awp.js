@@ -5,6 +5,7 @@ document.onreadystatechange = function () {
     var isMouseDown = false;
     var playingTrackNumber;
     var volumeControlAngle;
+    var volumeCache;
     var refreshPlayerProgressInterval1;
     var refreshPlayerProgressInterval2;
     var refreshPlayerProgressInterval3;
@@ -108,6 +109,30 @@ document.onreadystatechange = function () {
     var audioWebPlayerHeaderSubtitleElement = document.createElement('div');
     var audioWebPlayerPlaylistElement = document.createElement('table');
 
+    function audioWebPlayerVolumeKnobIconChange(pointerPositionX, pointerPositionY, deviceType) {
+      if (deviceType === 'desktop') {
+        volumeControlAngle = (Math.atan2((audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().top + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().height / 2) - pointerPositionY, (audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().left + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().width / 2) -  pointerPositionX)  * 180 / Math.PI);
+        audioWebPlayerTooltipElement.style.left = (pointerPositionX - audioWebPlayerContainer.getBoundingClientRect().left + 10).toString() + 'px';
+        audioWebPlayerTooltipElement.style.top = (pointerPositionY - audioWebPlayerContainer.getBoundingClientRect().top + 15).toString() + 'px';
+      } else if (deviceType === 'mobile') {
+        volumeControlAngle = (Math.atan2((window.scrollY + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().top + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().height / 2) - pointerPositionY, (window.scrollX + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().left + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().width / 2) -  pointerPositionX)  * 180 / Math.PI);
+        audioWebPlayerTooltipElement.style.left = ((pointerPositionX - window.scrollX) - audioWebPlayerContainer.getBoundingClientRect().left + 30).toString() + 'px';
+        audioWebPlayerTooltipElement.style.top = ((pointerPositionY - window.scrollY) - audioWebPlayerContainer.getBoundingClientRect().top - 75).toString() + 'px';
+      }
+      if (volumeControlAngle >= -45 || volumeControlAngle <= -135) {
+        audioWebPlayerVolumeKnobIconElement.firstChild.style.transform = 'rotate(' + (volumeControlAngle - 90).toString() + 'deg)';
+        if (volumeControlAngle >= -45) {
+          audioElement.volume = (volumeControlAngle + 45) / 270;
+          audioWebPlayerTooltipElement.innerHTML = 'Głośność:&nbsp;' + Math.floor((volumeControlAngle + 45) / 270 * 100).toString() + '% ';
+          audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.floor((volumeControlAngle + 45) / 270 * 100));
+        } else if (volumeControlAngle <= -135) {
+          audioElement.volume = (volumeControlAngle + 405) / 270;
+          audioWebPlayerTooltipElement.innerHTML = 'Głośność:&nbsp;' + Math.ceil((volumeControlAngle + 405) / 270 * 100).toString() + '%';
+          audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.ceil((volumeControlAngle + 405) / 270 * 100));
+        }
+      }
+    }
+
     var focusableElements = document.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
 
     if (window.location.protocol == 'http:' || window.location.protocol == 'https:') {
@@ -162,20 +187,42 @@ document.onreadystatechange = function () {
             }
             if (settingsObject.interface.showVolumeKnob == true) {
               audioWebPlayerVolumeKnobIconElement.style.display = 'block';
-              audioWebPlayerVolumeKnobIconElement.addEventListener('mousedown', e => {
-                e.preventDefault();
-                isMouseDown = true;
-                audioWebPlayerTooltipElement.style.display = 'block';
+              ['mousedown', 'touchstart'].forEach(function(e) {
+                audioWebPlayerVolumeKnobIconElement.addEventListener(e, function(e) {
+                  e.preventDefault();
+                  isMouseDown = true;
+                  audioWebPlayerTooltipElement.style.display = 'block';
+                }, false);
               });
-              audioWebPlayerVolumeKnobIconElement.addEventListener('mouseup', e => {
-                e.preventDefault();
-                isMouseDown = false;
-                audioWebPlayerTooltipElement.style.display = 'none';
+              ['mouseup', 'touchend'].forEach(function(e) {
+                audioWebPlayerVolumeKnobIconElement.addEventListener(e, function(e) {
+                  e.preventDefault();
+                  isMouseDown = false;
+                  audioWebPlayerTooltipElement.style.display = 'none';
+                }, false);
               });
-              document.body.addEventListener('mouseup', function() {
-                isMouseDown = false;
-                audioWebPlayerTooltipElement.style.display = 'none';
-              }, true);
+              ['mouseup', 'touchend'].forEach(function(e) {
+                document.body.addEventListener(e, function(e) {
+                  isMouseDown = false;
+                  audioWebPlayerTooltipElement.style.display = 'none';
+                }, true);
+              });
+              audioWebPlayerVolumeKnobIconElement.addEventListener('dblclick', function() {
+                if (audioElement.volume === 0) {
+                  if (volumeControlAngle >= -45) {
+                    audioWebPlayerVolumeKnobIconElement.firstChild.style.transform = 'rotate(' + (270 * volumeCache - 495).toString() + 'deg)';
+                  } else if (volumeControlAngle <= -135) {
+                    audioWebPlayerVolumeKnobIconElement.firstChild.style.transform = 'rotate(' + (270 * volumeCache - 135).toString() + 'deg)';
+                  }
+                  audioElement.volume = volumeCache;
+                  audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.round(volumeCache));
+                } else {
+                  volumeCache = audioElement.volume;
+                  audioWebPlayerVolumeKnobIconElement.firstChild.style.transform = 'rotate(-135deg)';
+                  audioElement.volume = 0;
+                  audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', 0);
+                }
+              }, false);
               audioWebPlayerVolumeKnobIconElement.addEventListener('keydown', e => {
                 var volume;
                 if (e.keyCode === 33 || e.keyCode === 38 || e.keyCode === 39) {
@@ -203,26 +250,19 @@ document.onreadystatechange = function () {
                   audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.round(volume * 100));
                   audioWebPlayerVolumeKnobIconElement.firstChild.style.transform = 'rotate(' + (volumeControlAngle).toString() + 'deg)';
                 }
-              });
-              document.addEventListener('mousemove', e => {
+              }, false);
+              document.addEventListener('mousemove', function(e) {
                 if (isMouseDown === true) {
-                  volumeControlAngle = (Math.atan2((window.scrollY + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().top + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().height / 2) - e.clientY, (window.scrollX + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().left + audioWebPlayerVolumeKnobIconElement.getBoundingClientRect().width / 2) -  e.clientX)  * 180 / Math.PI);
-                  if (volumeControlAngle >= -45 || volumeControlAngle <= -135) {
-                    audioWebPlayerVolumeKnobIconElement.firstChild.style.transform = 'rotate(' + (volumeControlAngle - 90).toString() + 'deg)';
-                    if (volumeControlAngle >= -45) {
-                      audioElement.volume = (volumeControlAngle + 45) / 270;
-                      audioWebPlayerTooltipElement.innerHTML = 'Głośność:&nbsp;' + Math.floor((volumeControlAngle + 45) / 270 * 100).toString() + '% ';
-                      audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.floor((volumeControlAngle + 45) / 270 * 100));
-                    } else if (volumeControlAngle <= -135) {
-                      audioElement.volume = (volumeControlAngle + 405) / 270;
-                      audioWebPlayerTooltipElement.innerHTML = 'Głośność:&nbsp;' + Math.ceil((volumeControlAngle + 405) / 270 * 100).toString() + '%';
-                      audioWebPlayerVolumeKnobIconElement.setAttribute('aria-valuenow', Math.ceil((volumeControlAngle + 405) / 270 * 100));
-                    }
-                    audioWebPlayerTooltipElement.style.left = (e.clientX - audioWebPlayerContainer.getBoundingClientRect().left + 10).toString() + 'px';
-                    audioWebPlayerTooltipElement.style.top = (e.clientY - audioWebPlayerContainer.getBoundingClientRect().top + 15).toString() + 'px';
-                  }
+                  audioWebPlayerVolumeKnobIconChange(e.clientX, e.clientY, 'desktop');
                 }
-              });
+              }, false);
+              document.addEventListener('touchmove', function(e) {
+                if (isMouseDown === true) {
+                  let evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
+                  let touch = e.touches[0] || e.changedTouches[0];
+                  audioWebPlayerVolumeKnobIconChange(touch.pageX, touch.pageY, 'mobile');
+                }
+              }, false);
               audioWebPlayerArrowElement = document.createElement('img');
               audioWebPlayerArrowElement.setAttribute('src', 'awp/sources/arrow.svg');
               audioWebPlayerArrowElement.setAttribute('alt', 'Strzałka');
